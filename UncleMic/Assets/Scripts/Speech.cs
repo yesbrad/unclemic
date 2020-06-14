@@ -17,18 +17,8 @@ public class Speech : MonoBehaviour
         speechManager.SynthesizeSuccessEvent += SynthesizeSuccessEvent;
 	}
 
-	private void Update()
-	{
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Speak("Josh you dog. Time for you to finish your drink!");
-        }  
-    }
-
     public void Speak (string text) 
     {
-        print("Talking: " + text);
-
         string content = text;
 
         if (string.IsNullOrEmpty(content) || voice == null)
@@ -46,7 +36,6 @@ public class Speech : MonoBehaviour
 
     private void SynthesizeSuccessEvent(PostSynthesizeResponse response)
     {
-        print("Fished with Sucesss");
         audioSource.clip = speechManager.GetAudioClipFromBase64(response.audioContent, Constants.DEFAULT_AUDIO_ENCODING);
         audioSource.Play();
     }

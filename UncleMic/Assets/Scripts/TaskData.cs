@@ -7,5 +7,6 @@ public class TaskData : ScriptableObject {
 
 [System.Serializable]
 public class Task {
+    [TextArea]
     public string message;
 }

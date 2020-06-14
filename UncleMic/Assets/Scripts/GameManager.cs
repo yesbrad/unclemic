@@ -8,6 +8,10 @@ public class GameManager : MonoBehaviour
     public TaskData data;
     public float minTime = 1;
     public float maxTime = 10;
+    public List<Player> players = new List<Player>();
+
+    public bool isDebug;
+    public Task debugTask;
 
     [Header("UI")]
     public Text taskText;
@@ -18,7 +22,7 @@ public class GameManager : MonoBehaviour
 
 	private void Start()
 	{
-        curTime = GetNewTime();
+        curTime = 0;//GetNewTime();
 	}
 
 	private void Update()
@@ -36,16 +40,33 @@ public class GameManager : MonoBehaviour
 
     private void NextTask () 
     {
-        Task task = data.tasks[Random.Range(0, data.tasks.Length - 1)];
+        Task task = GetNewTask();
 
-        taskText.text = task.message;
+        string playerMessage = task.message.Replace("PLAYER", SelectPlayer().name);
+        playerMessage = playerMessage.Replace("EXTRA", SelectPlayer().name);
+
+        taskText.text = playerMessage;
         backgroundImage.color = Random.ColorHSV();
 
-        Speech.instance.Speak(task.message);
+        Speech.instance.Speak(playerMessage);
+    }
+
+    public Task GetNewTask (){
+        return isDebug ? debugTask : data.tasks[Random.Range(0, data.tasks.Length - 1)];
+    }
+
+    public Player SelectPlayer () {
+        return players[Random.Range(0, players.Count - 1)];
     }
 
     public int GetNewTime ()
     {
         return (int)Random.Range(minTime, maxTime);    
     }
+}
+
+[System.Serializable]
+public class Player 
+{
+    public string name;
 }
