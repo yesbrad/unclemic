@@ -3,8 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum GameState {
+    Menu,
+    Game,
+}
+
 public class GameManager : MonoBehaviour 
 {
+    public static GameManager instance;
+
     public TaskData data;
     public float minTime = 1;
     public float maxTime = 10;
@@ -19,23 +26,29 @@ public class GameManager : MonoBehaviour
     public Text debugTimeText;
 
     float curTime;
+    internal GameState gameState = GameState.Menu;
 
 	private void Start()
 	{
-        curTime = 0;//GetNewTime();
+        instance = this;
+        curTime = 0;
+        SetGameState(GameState.Menu);
 	}
 
 	private void Update()
 	{
-        curTime -= Time.deltaTime;
-
-        if(curTime < 0)
+        if(gameState == GameState.Game) 
         {
-            NextTask();
-            curTime = GetNewTime();
-        }
+            curTime -= Time.deltaTime;
 
-        debugTimeText.text = "" + Mathf.Floor(curTime);
+            if(curTime < 0)
+            {
+                NextTask();
+                curTime = GetNewTime();
+            }
+
+            debugTimeText.text = "" + Mathf.Floor(curTime);
+		}
 	}
 
     private void NextTask () 
@@ -63,10 +76,20 @@ public class GameManager : MonoBehaviour
     {
         return (int)Random.Range(minTime, maxTime);    
     }
+
+    public void SetGameState (GameState state)
+    {
+        gameState = state;
+        UIManager.instance.UpdatePanel();
+    }
 }
 
 [System.Serializable]
-public class Player 
+public class Player
 {
     public string name;
+
+    public Player(string newName) {
+        name = newName;
+    }
 }

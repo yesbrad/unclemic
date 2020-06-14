@@ -12,8 +12,14 @@ MonoBehaviour:
   m_Name: NewTasks
   m_EditorClassIdentifier: 
   tasks:
-  - message: Ken, Please neck your drink!
+  - message: PLAYER, Please neck your drink!
   - message: 7 IS HEAVEN
-  - message: Taylah, Five sips please.
-  - message: Last person to slap JOHN on the ass drinks big.
+  - message: PLAYER, Five sips please.
+  - message: Last person to slap PLAYER on the ass drinks big.
   - message: The Floor is LAVA!
+  - message: PLAYER take 5 sips
+  - message: PLAYER leave the room for 5 minutes
+  - message: Last person to say PLAYER is a DOG CUNT, half of that Beverage need to
+      go!
+  - message: PLAYER swap drinks with EXTRA
+  - message: PLAYER. Take EXTRAs drinks and take 8 sips.
