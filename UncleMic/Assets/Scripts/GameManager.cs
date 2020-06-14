@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using GoogleSheetsToUnity;
 
 public enum GameState {
     Menu,
@@ -12,7 +13,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public TaskData data;
+    //public TaskData data;
+    public List<DrinkTask> data = new List<DrinkTask>();
     public float minTime = 1;
     public float maxTime = 10;
     public int speechDelayTime = 2;
@@ -20,7 +22,7 @@ public class GameManager : MonoBehaviour
     public List<Player> players = new List<Player>();
 
     public bool isDebug;
-    public Task debugTask;
+    public DrinkTask debugTask;
 
     [Header("UI")]
     public Text taskText;
@@ -38,7 +40,21 @@ public class GameManager : MonoBehaviour
         curTime = 0;
         SetGameState(GameState.Menu);
         audioSource = GetComponent<AudioSource>();
+
+        FetchTaskData();
 	}
+
+    public void FetchTaskData()
+    {
+        SpreadsheetManager.Read(new GSTU_Search("1rdp9VNO-s_Uxn3YFYZoLaVCRTudt19UQi4FwEs8BL-U", "Tasks"), (GstuSpreadSheet sheet) =>
+        {
+            foreach (var val in sheet.columns["A"])
+            {
+                data.Add(new DrinkTask(val.value));
+            }
+        });
+    }
+
 
 	private void Update()
 	{
@@ -58,7 +74,7 @@ public class GameManager : MonoBehaviour
 
     private void NextTask () 
     {
-        Task task = GetNewTask();
+        DrinkTask task = GetNewTask();
 
         audioSource.PlayOneShot(taskClip);
 
@@ -76,8 +92,8 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    public Task GetNewTask (){
-        return isDebug ? debugTask : data.tasks[Random.Range(0, data.tasks.Length - 1)];
+    public DrinkTask GetNewTask (){
+        return isDebug ? debugTask : data[Random.Range(0, data.Count - 1)];
     }
 
     public Player SelectPlayer () {
