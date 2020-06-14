@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
     public TaskData data;
     public float minTime = 1;
     public float maxTime = 10;
+    public int speechDelayTime = 2;
+    public AudioClip taskClip;
     public List<Player> players = new List<Player>();
 
     public bool isDebug;
@@ -25,6 +27,8 @@ public class GameManager : MonoBehaviour
     public Image backgroundImage;
     public Text debugTimeText;
 
+    private AudioSource audioSource;
+
     float curTime;
     internal GameState gameState = GameState.Menu;
 
@@ -33,6 +37,7 @@ public class GameManager : MonoBehaviour
         instance = this;
         curTime = 0;
         SetGameState(GameState.Menu);
+        audioSource = GetComponent<AudioSource>();
 	}
 
 	private void Update()
@@ -55,13 +60,20 @@ public class GameManager : MonoBehaviour
     {
         Task task = GetNewTask();
 
+        audioSource.PlayOneShot(taskClip);
+
         string playerMessage = task.message.Replace("PLAYER", SelectPlayer().name);
         playerMessage = playerMessage.Replace("EXTRA", SelectPlayer().name);
 
         taskText.text = playerMessage;
         backgroundImage.color = Random.ColorHSV();
+        StartCoroutine(DelaySpeech(playerMessage));
+    }
 
+    IEnumerator DelaySpeech (string playerMessage) {
+        yield return new WaitForSeconds(speechDelayTime);
         Speech.instance.Speak(playerMessage);
+        yield return null;
     }
 
     public Task GetNewTask (){
