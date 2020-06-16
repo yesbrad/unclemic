@@ -26,18 +26,20 @@ public class GameManager : MonoBehaviour
     public AudioClip taskClip;
     public List<Player> players = new List<Player>();
 
+	[Header("DEBUG")]
     public bool useDebugSheet;
+	public bool removeVoice;
 
-    [Header("UI")]
+	[Header("UI")]
     public Text taskText;
     public Image backgroundImage;
     public Text debugTimeText;
 
     int currentStep;
     private AudioSource audioSource;
-    public List<Player> recentPlayers = new List<Player>();
-
-    float curTime;
+    private List<Player> recentPlayers = new List<Player>();
+	public List<DrinkTask> recentTasks = new List<DrinkTask>();
+	float curTime;
     internal GameState gameState = GameState.Menu;
 
 	private void Start()
@@ -114,8 +116,11 @@ public class GameManager : MonoBehaviour
 
         taskText.text = task.message;
         backgroundImage.color = Random.ColorHSV();
-        StartCoroutine(DelaySpeech(task.message));
-        currentStep++;
+		
+		if(!removeVoice)
+        	StartCoroutine(DelaySpeech(task.message));
+        
+		currentStep++;
     }
 
     IEnumerator DelaySpeech (string playerMessage) {
@@ -139,7 +144,37 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        DrinkTask selectedTask = new DrinkTask(data[Random.Range(0, data.Count)]);
+        DrinkTask selectedTask = data[Random.Range(0, data.Count)];
+
+        bool freshTask = true;
+        bool breakLoop = false;
+
+        while(breakLoop == false){
+            selectedTask = data[Random.Range(0, data.Count - 1)];
+            freshTask = true;
+
+            if(recentTasks.Count > 0){
+                for (int i = 0; i < recentTasks.Count; i++)
+                {
+                    if(recentTasks[i].message == selectedTask.message){
+                        freshTask = false;
+                    }
+                }
+            } 
+
+            if (freshTask) {
+                breakLoop = true;
+            }
+        }
+
+        recentTasks.Add(selectedTask);
+
+        if(recentTasks.Count > data.Count - data.Count / 2){
+            recentTasks.RemoveAt(0);
+        }
+
+		// Create an instance instead of a reference
+		selectedTask = new DrinkTask(selectedTask);
 
         //Format names in
         Player p1 = SelectPlayer();
@@ -160,6 +195,7 @@ public class GameManager : MonoBehaviour
 
         return selectedTask;
     }
+
 
     public Player SelectPlayer(bool addToHistory = true)
     {
@@ -186,7 +222,6 @@ public class GameManager : MonoBehaviour
             } 
 
             if (freshPlayer) {
-                Debug.Log("We found a fresh Player");
                 breakLoop = true;
             }
         }
@@ -195,7 +230,6 @@ public class GameManager : MonoBehaviour
 
         // Remove recentPlayers from the list so they can be reused
         if(recentPlayers.Count > players.Count - (players.Count < 4 ? 2 : (players.Count / 2))){
-            print("Removing Recent Player: " + recentPlayers[0].name);
             recentPlayers.RemoveAt(0);
         }
 
