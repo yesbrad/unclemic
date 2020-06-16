@@ -20,15 +20,18 @@ public class GameManager : MonoBehaviour
     private List<DrinkTask> data = new List<DrinkTask>();
     private List<DrinkTaskCue> cueData = new List<DrinkTaskCue>();
 
-    public float minTime = 1;
-    public float maxTime = 10;
-    public int speechDelayTime = 2;
+	// public float minTime = 1;
+	// public float maxTime = 10;
+	public TaskTimes times;
+	public int speechDelayTime = 2;
     public AudioClip taskClip;
     public List<Player> players = new List<Player>();
 
 	[Header("DEBUG")]
     public bool useDebugSheet;
 	public bool removeVoice;
+	public bool useDebugTimes;
+	public TaskTimes DEBUGTimes;
 
 	[Header("UI")]
     public Text taskText;
@@ -238,7 +241,7 @@ public class GameManager : MonoBehaviour
 
     public int GetNewTime ()
     {
-        return (int)Random.Range(minTime, maxTime);    
+        return (int)Random.Range(useDebugTimes ? DEBUGTimes.minTime : times.minTime, useDebugTimes ? DEBUGTimes.maxTime : times.maxTime);    
     }
 
     public void SetGameState (GameState state)
@@ -320,4 +323,10 @@ public class DrinkTaskCue {
     public void SetSteps (int _steps){
         steps = _steps;
     }
+}
+
+[System.Serializable]
+public struct TaskTimes {
+	public float minTime;
+	public float maxTime;
 }

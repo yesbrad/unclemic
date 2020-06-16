@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50a21b1eb7153446cb0a45667999e7fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 6859fb9c23a284528bc2780831573445, type: 2}
-  minTime: 7
-  maxTime: 15
+  times:
+    minTime: 400
+    maxTime: 600
   speechDelayTime: 1
   taskClip: {fileID: 8300000, guid: d8f7ce8b7153f404f971c3561dbbeb44, type: 3}
   players:
@@ -57,13 +57,16 @@ MonoBehaviour:
   - name: Jake
   - name: Shaneo
   - name: Kate
-  isDebug: 0
-  debugTask:
-    message: PLAYER. Take EXTRAs drink and take 8 sips. And please enjoy them. Otherwise
-      finish your whole drink!
+  useDebugSheet: 0
+  removeVoice: 0
+  useDebugTimes: 0
+  DEBUGTimes:
+    minTime: 5
+    maxTime: 10
   taskText: {fileID: 0}
   backgroundImage: {fileID: 0}
   debugTimeText: {fileID: 0}
+  recentTasks: []
 --- !u!82 &8771072972337389711
 AudioSource:
   m_ObjectHideFlags: 0
