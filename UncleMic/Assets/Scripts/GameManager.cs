@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using GoogleSheetsToUnity;
+using UnityEngine.Events;
 
 public enum GameState {
     Menu,
@@ -42,34 +43,47 @@ public class GameManager : MonoBehaviour
 	private void Start()
 	{
         instance = this;
-        curTime = 0;
-        SetGameState(GameState.Menu);
         audioSource = GetComponent<AudioSource>();
-
-        FetchTaskData();
+        SetGameState(GameState.Menu);
 	}
 
-    public void FetchTaskData()
-    {
-        SpreadsheetManager.Read(new GSTU_Search("1rdp9VNO-s_Uxn3YFYZoLaVCRTudt19UQi4FwEs8BL-U", useDebugSheet ? "DebugTasks" : "Tasks"), (GstuSpreadSheet sheet) =>
-        {
-            print("Finished SpreadSheet Fetch");
-            int i = 0;
-            foreach (var val in sheet.columns["A"])
-            {
-                i++;
-                if (!string.IsNullOrEmpty(val.value))
-                {
-                    if(IsValidCell(sheet["B" + i].value) && IsValidCell(sheet["C" + i].value)){
-                        data.Add(new DrinkTask(val.value, new DrinkTaskCue(new DrinkTask(sheet["B" + i].value),int.Parse(sheet["C" + i].value))));
-                    } else {
-                        data.Add(new DrinkTask(val.value));
-                    }
+	public void BeginGame (UnityAction<bool> startCallback) {
+		FetchTaskData((success) => {
+			startCallback.Invoke(success);
+			if(success){
+				SetGameState(GameState.Game);
+			}
+		});
+	}
 
-                }
-            }
-        });
-    }
+    public void FetchTaskData(UnityAction<bool> callback)
+    {
+		SpreadsheetManager.Read(new GSTU_Search("1rdp9VNO-s_Uxn3YFYZoLaVCRTudt19UQi4FwEs8BL-U", useDebugSheet ? "DebugTasks" : "Tasks"), (GstuSpreadSheet sheet) =>
+		{
+			print("Finished SpreadSheet Fetch");
+			int i = 0;
+			foreach (var val in sheet.columns["A"])
+			{
+				i++;
+				if (!string.IsNullOrEmpty(val.value))
+				{
+					if (IsValidCell(sheet["B" + i].value) && IsValidCell(sheet["C" + i].value))
+					{
+						data.Add(new DrinkTask(val.value, new DrinkTaskCue(new DrinkTask(sheet["B" + i].value), int.Parse(sheet["C" + i].value))));
+					}
+					else
+					{
+						data.Add(new DrinkTask(val.value));
+					}
+
+				}
+			}
+			callback.Invoke(true);
+		}, (RequestErrorResponse error) => {
+			Debug.LogError("Google Sheets Response Failed: " + error.statusCode);
+			callback.Invoke(false);
+		});
+	}
 
     private bool IsValidCell (string cellVal){
         return !string.IsNullOrWhiteSpace(cellVal) && cellVal != "NULL" && cellVal != "null";
@@ -196,6 +210,21 @@ public class GameManager : MonoBehaviour
     public void SetGameState (GameState state)
     {
         gameState = state;
+
+		if(state == GameState.Menu){
+			currentStep = 0;
+			curTime = 0;
+
+			if(Speech.instance)
+			{
+				Speech.instance.audioSource.Stop();
+				Speech.instance.audioSource.clip = null;
+			}
+			
+			cueData.Clear();
+			data.Clear();
+		}
+
         UIManager.instance.UpdatePanel();
     }
 }

@@ -10,7 +10,11 @@ public class PlayerMenu : MonoBehaviour
     public Transform playerNameContainer;
     public InputField nameInput;
 
-    private List<PlayerMenuItem> items = new List<PlayerMenuItem>();
+	public Image playIcon;
+	public Image loadingIcon;
+	public Text errorText;
+
+	private List<PlayerMenuItem> items = new List<PlayerMenuItem>();
 
 	private void Start()
 	{
@@ -65,6 +69,14 @@ public class PlayerMenu : MonoBehaviour
 
     public void Play()
     {
-        GameManager.instance.SetGameState(GameState.Game);
-    }
+		playIcon.gameObject.SetActive(false);
+		loadingIcon.gameObject.SetActive(true);
+		errorText.gameObject.SetActive(false);
+
+		GameManager.instance.BeginGame((success) => {
+			playIcon.gameObject.SetActive(true);
+			loadingIcon.gameObject.SetActive(false);
+			errorText.gameObject.SetActive(!success);
+		});
+	}
 }

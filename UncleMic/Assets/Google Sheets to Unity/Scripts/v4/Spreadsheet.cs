@@ -247,6 +247,19 @@ namespace GoogleSheetsToUnity
         USER_ENTERED
     }
 
+	/// <summary>
+	///	Error Response class for out requests
+	/// </summary>
+	public class RequestErrorResponse {
+		public string errorMessage;
+		public string statusCode;
+
+		public RequestErrorResponse (string _message, string _statusCode){
+			errorMessage = _message;
+			statusCode = _statusCode;
+		}
+	}
+
     [Serializable]
     public class GstuSpreadSheet
     {

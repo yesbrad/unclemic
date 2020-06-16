@@ -42,7 +42,7 @@ namespace GoogleSheetsToUnity
         /// <param name="search"></param>
         /// <param name="callback"></param>
         /// <param name="containsMergedCells"> does the spreadsheet contain merged cells, will attempt to group these by titles</param>
-        public static void Read(GSTU_Search search, UnityAction<GstuSpreadSheet> callback, bool containsMergedCells = false)
+        public static void Read(GSTU_Search search, UnityAction<GstuSpreadSheet> callback, UnityAction<RequestErrorResponse> errorCallback, bool containsMergedCells = false)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("https://sheets.googleapis.com/v4/spreadsheets");
@@ -55,12 +55,12 @@ namespace GoogleSheetsToUnity
 
             if (Application.isPlaying)
             {
-                new Task(Read(request, search, containsMergedCells, callback));
+                new Task(Read(request, search, containsMergedCells, callback, errorCallback));
             }
 #if UNITY_EDITOR
             else
             {
-                EditorCoroutineRunner.StartCoroutine(Read(request,  search, containsMergedCells, callback));
+                EditorCoroutineRunner.StartCoroutine(Read(request,  search, containsMergedCells, callback, errorCallback));
             }
 #endif
         }
@@ -73,7 +73,7 @@ namespace GoogleSheetsToUnity
         /// <param name="containsMergedCells"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        static IEnumerator Read(UnityWebRequest request, GSTU_Search search, bool containsMergedCells, UnityAction<GstuSpreadSheet> callback)
+        static IEnumerator Read(UnityWebRequest request, GSTU_Search search, bool containsMergedCells, UnityAction<GstuSpreadSheet> callback,  UnityAction<RequestErrorResponse> errorCallback)
         {
             if (Application.isPlaying)
             {
@@ -89,6 +89,11 @@ namespace GoogleSheetsToUnity
             using (request)
             {
                 yield return request.SendWebRequest();
+
+				if(request.isNetworkError || request.isHttpError) {
+					errorCallback.Invoke(new RequestErrorResponse("Google Sheets Request Failed", request.responseCode.ToString()));
+					throw new System.Exception("Request Failed");
+				}
 
                 if(string.IsNullOrEmpty(request.downloadHandler.text) || request.downloadHandler.text == "{}")
                 {
@@ -118,7 +123,8 @@ namespace GoogleSheetsToUnity
 
                 if (callback != null)
                 {
-                    callback(new GstuSpreadSheet(responce, search.titleColumn,search.titleRow));
+					Debug.Log("Did we make it here!: " + rawData);
+					callback(new GstuSpreadSheet(responce, search.titleColumn,search.titleRow));
                 }
             }
         }
