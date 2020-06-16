@@ -36,7 +36,8 @@ public class PlayerMenu : MonoBehaviour
             PlayerMenuItem item = Instantiate(playerMenuPrefab).GetComponent<PlayerMenuItem>();
 			item.transform.SetParent(playerNameContainer);
             item.transform.SetSiblingIndex(0);
-            item.Init(GameManager.instance.players[i]);
+			item.transform.localScale = Vector3.one;
+			item.Init(GameManager.instance.players[i]);
             items.Add(item);
         }
     }
