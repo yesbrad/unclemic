@@ -11,6 +11,9 @@ public class Speech : MonoBehaviour
     public GCTextToSpeech speechManager;
     public AudioSource audioSource;
 
+    public float pitch = 1;
+    public float speed = 1;
+
 	private void Start()
 	{
         instance = this;
@@ -31,7 +34,7 @@ public class Speech : MonoBehaviour
             name = voice.name
         };
 
-        speechManager.Synthesize(content, voiceCon, false, 1, 1, voice.naturalSampleRateHertz);
+        speechManager.Synthesize(content, voiceCon, false, pitch, speed, voice.naturalSampleRateHertz);
     }
 
     private void SynthesizeSuccessEvent(PostSynthesizeResponse response)

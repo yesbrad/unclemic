@@ -35,8 +35,8 @@ public class GameManager : MonoBehaviour
 
 	[Header("UI")]
     public Text taskText;
-    public Image backgroundImage;
     public Text debugTimeText;
+    public BackgroundColours backgroundColors;
 
     int currentStep;
     private AudioSource audioSource;
@@ -72,14 +72,19 @@ public class GameManager : MonoBehaviour
 				i++;
 				if (!string.IsNullOrEmpty(val.value))
 				{
-					if (IsValidCell(sheet["B" + i].value) && IsValidCell(sheet["C" + i].value))
+                    if (IsValidCell(sheet["B" + i].value) && IsValidCell(sheet["C" + i].value) && IsValidCell(sheet["D" + i].value))
 					{
-						data.Add(new DrinkTask(val.value, new DrinkTaskCue(new DrinkTask(sheet["B" + i].value), int.Parse(sheet["C" + i].value))));
+                        DrinkTask queuedTask = new DrinkTask(sheet["B" + i].value, int.Parse(sheet["D" + i].value));
+                        data.Add(new DrinkTask(val.value, new DrinkTaskCue(queuedTask, int.Parse(sheet["C" + i].value))));
 					}
-					else
+                    else if(IsValidCell(sheet["D" + i].value))
 					{
-						data.Add(new DrinkTask(val.value));
-					}
+                        data.Add(new DrinkTask(val.value, int.Parse(sheet["D" + i].value)));
+                    }
+                    else
+                    {
+                        data.Add(new DrinkTask(val.value));
+                    }
 
 				}
 			}
@@ -118,10 +123,11 @@ public class GameManager : MonoBehaviour
         audioSource.PlayOneShot(taskClip);
 
         taskText.text = task.message;
-        backgroundImage.color = Random.ColorHSV();
 		
 		if(!removeVoice)
         	StartCoroutine(DelaySpeech(task.message));
+
+        GameMenu.instance.UpdateBackground(task);
         
 		currentStep++;
     }
@@ -283,11 +289,13 @@ public class DrinkTask
     public string message = "";
     public DrinkTaskCue qTask = null;
     public bool hasQTask;
+    public int severity;
 
-    public DrinkTask(string newMessage){
+    public DrinkTask(string newMessage, int _severity = 3){
         message = newMessage;
         qTask = null;
         hasQTask = false;
+        severity = _severity;
     }
 
     public DrinkTask(DrinkTask drinkTask)
@@ -295,12 +303,14 @@ public class DrinkTask
         message = drinkTask.message;
         qTask = drinkTask.qTask;
         hasQTask = drinkTask.hasQTask;
+        severity = drinkTask.severity;
     }
 
-    public DrinkTask(string newMessage, DrinkTaskCue taskCue){
+    public DrinkTask(string newMessage, DrinkTaskCue taskCue, int _severity = 3){
         message = newMessage;
         qTask = taskCue;
         hasQTask = true;
+        severity = _severity;
     }
 
     public bool HasCueTask(){
@@ -329,4 +339,9 @@ public class DrinkTaskCue {
 public struct TaskTimes {
 	public float minTime;
 	public float maxTime;
+}
+
+[System.Serializable]
+public class BackgroundColours {
+    public Color[] colors;
 }
